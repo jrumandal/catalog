@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout catalog
+        uses: actions/checkout@v4
+
+      - name: Checkout shared (sibling workspace)
+        uses: actions/checkout@v4
+        with:
+          repository: jrumandal/shared
+          path: ../shared
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Link shared packages into a workspace
+        run: |
+          cd ..
+          printf 'packages:\n  - shared/packages/*\n  - catalog\n' > pnpm-workspace.yaml
+          printf '{"name":"mf-ci","private":true,"packageManager":"pnpm@11.24.0"}\n' > package.json
+          cd catalog
+
+      - name: Install
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+  publish:
+    name: Publish to GitHub Packages
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout catalog
+        uses: actions/checkout@v4
+
+      - name: Checkout shared (sibling workspace)
+        uses: actions/checkout@v4
+        with:
+          repository: jrumandal/shared
+          path: ../shared
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Configure npm auth
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+      - name: Link shared packages into a workspace
+        run: |
+          cd ..
+          printf 'packages:\n  - shared/packages/*\n  - catalog\n' > pnpm-workspace.yaml
+          printf '{"name":"mf-ci","private":true,"packageManager":"pnpm@11.24.0"}\n' > package.json
+          cd catalog
+
+      - name: Install
+        run: pnpm install
+
+      - name: Publish
+        run: node scripts/publish.mjs
