@@ -14,8 +14,8 @@ import 'zone.js';
 import { renderApplication } from '@angular/platform-server';
 import { bootstrapApplication, type BootstrapContext } from '@angular/platform-browser';
 import { CATALOG_SSR_PROPS, CatalogComponent } from './lib/catalog.component';
-import type { EventBus, MFEventMap } from '@shared/event-bus';
-import type { Category, Product } from '@shared/contracts';
+import type { EventBus, MFEventMap } from '@jrumandal/event-bus';
+import type { Category, Product } from '@jrumandal/contracts';
 
 /** The props the shell passes to the catalog micro-frontend. */
 export interface CatalogProps {

@@ -12,16 +12,16 @@ import {
   CatalogEvent,
   EventBus,
   type MFEventMap,
-} from "@shared/event-bus";
+} from "@jrumandal/event-bus";
 import type {
   Category,
   Product,
   MfApolloClient,
-} from "@shared/contracts";
+} from "@jrumandal/contracts";
 import {
   getBridgeAdapter,
   type ScanResult,
-} from "@shared/bridge";
+} from "@jrumandal/bridge";
 
 /**
  * Injection token carrying the initial SSR props for the catalog MF.

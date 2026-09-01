@@ -6,11 +6,11 @@ together with the other micro-frontends, so this repo ships TypeScript source
 directly (`main`/`types` → `src/index.ts`) rather than a pre-built bundle.
 
 The catalog renders a product grid with category filtering, price filtering,
-search, and a "scan product" action (via `@shared/bridge`). It is exposed to
+search, and a "scan product" action (via `@jrumandal/bridge`). It is exposed to
 the shell as the **`<mf-catalog>`** web component.
 
 > **Status:** Phase C — full faithful port of the reference catalog, with the
-> Tailwind v4 + `@shared/design-tokens` design system applied.
+> Tailwind v4 + `@jrumandal/design-tokens` design system applied.
 
 ## Stack
 
@@ -21,16 +21,16 @@ the shell as the **`<mf-catalog>`** web component.
 | Tests      | Vitest + jsdom                                      |
 | Lint       | ESLint 9 (flat) + typescript-eslint                 |
 | Types      | TypeScript 5.9                                      |
-| Styling    | Tailwind v4 (via `@shared/design-tokens`)           |
+| Styling    | Tailwind v4 (via `@jrumandal/design-tokens`)           |
 
 ## Shared dependencies
 
 This repo consumes the shared libraries from the `shared` repo:
 
-- `@shared/contracts` — typed API contracts + shared Apollo client
-- `@shared/design-tokens` — Tailwind v4 theme + design tokens
-- `@shared/event-bus` — cross-MF event bus
-- `@shared/bridge` — native bridge (camera scan)
+- `@jrumandal/contracts` — typed API contracts + shared Apollo client
+- `@jrumandal/design-tokens` — Tailwind v4 theme + design tokens
+- `@jrumandal/event-bus` — cross-MF event bus
+- `@jrumandal/bridge` — native bridge (camera scan)
 
 In local development these resolve via the `workspace:*` protocol (see the
 top-level `pnpm-workspace.yaml`). In CI, the `shared` repo is checked out as a
