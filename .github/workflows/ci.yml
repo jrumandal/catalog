@@ -13,87 +13,47 @@ jobs:
     steps:
       - name: Checkout catalog
         uses: actions/checkout@v4
+        with:
+          repository: jrumandal/catalog
+          path: catalog
 
       - name: Checkout shared (sibling workspace)
         uses: actions/checkout@v4
         with:
           repository: jrumandal/shared
-          path: ../shared
+          path: shared
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 11.24.0
-          runInstall: false
+          run_install: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
 
-      - name: Link shared packages into a workspace
+      - name: Link sibling into a workspace
         run: |
-          cd ..
-          printf 'packages:\n  - shared/packages/*\n  - catalog\n' > pnpm-workspace.yaml
-          printf '{"name":"mf-ci","private":true,"packageManager":"pnpm@11.24.0"}\n' > package.json
-          cd catalog
+          printf 'packages:\n  - "catalog"\n  - "shared/packages/*"\n' > pnpm-workspace.yaml
+          printf '{\n  "name": "mf-workspace",\n  "private": true\n}\n' > package.json
 
       - name: Install
         run: pnpm install
 
       - name: Lint
+        working-directory: catalog
         run: pnpm lint
 
       - name: Typecheck
+        working-directory: catalog
         run: pnpm typecheck
 
       - name: Test
+        working-directory: catalog
         run: pnpm test
 
       - name: Build
+        working-directory: catalog
         run: pnpm build
-
-  publish:
-    name: Publish to GitHub Packages
-    needs: ci
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout catalog
-        uses: actions/checkout@v4
-
-      - name: Checkout shared (sibling workspace)
-        uses: actions/checkout@v4
-        with:
-          repository: jrumandal/shared
-          path: ../shared
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.24.0
-          runInstall: false
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Configure npm auth
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
-      - name: Link shared packages into a workspace
-        run: |
-          cd ..
-          printf 'packages:\n  - shared/packages/*\n  - catalog\n' > pnpm-workspace.yaml
-          printf '{"name":"mf-ci","private":true,"packageManager":"pnpm@11.24.0"}\n' > package.json
-          cd catalog
-
-      - name: Install
-        run: pnpm install
-
-      - name: Publish
-        run: node scripts/publish.mjs
