@@ -1,5 +1,5 @@
 /**
- * Public entry point for the `@mf/catalog` micro-frontend package.
+ * Public entry point for the `@jrumandal/catalog` micro-frontend package.
  *
  * Exposes the Angular component, the custom-element registration / hydration
  * helpers, and the SSR renderer so the shell (or any consumer) can:

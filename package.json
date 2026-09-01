@@ -1,5 +1,5 @@
 {
-  "name": "@mf/catalog",
+  "name": "@jrumandal/catalog",
   "version": "0.0.1",
   "description": "Catalog micro-frontend (Angular 20, standalone component + @angular/elements custom element + SSR). Source-only ESM package consumed by the shell.",
   "type": "module",
@@ -16,7 +16,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "build": "node -e \"console.log('@mf/catalog is source-only (no build step).')\"",
+    "build": "node -e \"console.log('@jrumandal/catalog is source-only (no build step).')\"",
     "publish": "node scripts/publish.mjs"
   },
   "dependencies": {

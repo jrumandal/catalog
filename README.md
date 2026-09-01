@@ -1,4 +1,4 @@
-# `@mf/catalog` — Catalog Micro-Frontend
+# `@jrumandal/catalog` — Catalog Micro-Frontend
 
 Angular 20 micro-frontend for the multi-framework micro-frontend reference
 architecture. It is a **source-only ESM package**: the shell (Vite) bundles it
@@ -48,7 +48,7 @@ pnpm build       # no-op (source-only package)
 
 ## Publishing
 
-`pnpm publish` (or the CI `publish` job) publishes `@mf/catalog` to GitHub
+`pnpm publish` (or the CI `publish` job) publishes `@jrumandal/catalog` to GitHub
 Packages. The shell consumes it as a versioned dependency.
 
 ## Repository layout

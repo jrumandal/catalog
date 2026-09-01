@@ -7,21 +7,22 @@ import {
   Optional,
   Output,
   ViewEncapsulation,
-} from "@angular/core";
+} from '@angular/core';
+import { cssVar, Tokens } from '@jrumandal/design-tokens';
 import {
   CatalogEvent,
   EventBus,
   type MFEventMap,
-} from "@jrumandal/event-bus";
+} from '@jrumandal/event-bus';
 import type {
   Category,
   Product,
   MfApolloClient,
-} from "@jrumandal/contracts";
+} from '@jrumandal/contracts';
 import {
   getBridgeAdapter,
   type ScanResult,
-} from "@jrumandal/bridge";
+} from '@jrumandal/bridge';
 
 /**
  * Injection token carrying the initial SSR props for the catalog MF.
@@ -34,7 +35,7 @@ export const CATALOG_SSR_PROPS = new InjectionToken<{
   products?: Product[];
   categories?: Category[];
   eventBus?: EventBus<MFEventMap> | null;
-}>("CATALOG_SSR_PROPS");
+}>('CATALOG_SSR_PROPS');
 
 /**
  * The catalog micro-frontend's root component.
@@ -50,60 +51,56 @@ export const CATALOG_SSR_PROPS = new InjectionToken<{
  * page) and, when an `EventBus` is provided, a typed cross-MF event.
  *
  * Uses Angular 17+ built-in `@if` / `@for` control flow (no `CommonModule`).
- *
- * Styling uses Tailwind v4 utility classes. The design tokens are mapped into
- * Tailwind namespaces by the host shell (see `@theme inline` in the shell's
- * `styles.css`), so utilities like `bg-brand-600` / `p-4` / `rounded-md`
- * resolve to the shared CSS custom properties.
  */
 @Component({
-  selector: "mf-catalog",
+  selector: 'mf-catalog',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="catalog flex flex-col gap-3 font-sans text-text-primary text-md leading-normal p-4 border border-border rounded-md bg-surface">
-      <header class="catalog__header flex items-center justify-between gap-2">
-        <h2 class="catalog__title m-0 text-lg font-semibold">Catalog</h2>
-        <span class="catalog__count text-sm text-text-secondary">
-          {{ products.length }} product{{ products.length === 1 ? "" : "s" }}
+    <div class="catalog">
+      <header class="catalog__header">
+        <h2 class="catalog__title">Catalog</h2>
+        <span class="catalog__count" [style.color]="colorSecondary">
+          {{ products.length }} product{{ products.length === 1 ? '' : 's' }}
         </span>
         <button
           type="button"
-          class="catalog__scan inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-brand-600 text-text-inverse cursor-pointer text-sm font-medium border-0"
+          class="catalog__scan"
+          [style.background]="brand"
+          [style.color]="inverse"
           [disabled]="scanning"
           (click)="onScanProduct()"
         >
-          {{ scanning ? "Scanning…" : "Scan product" }}
+          {{ scanning ? 'Scanning…' : 'Scan product' }}
         </button>
       </header>
 
       @if (scanResult) {
-        <div class="catalog__scan-result flex flex-col gap-2 p-3 border border-border rounded-sm bg-surface-subtle">
+        <div class="catalog__scan-result" [style.borderColor]="border">
           <img
-            class="catalog__scan-image w-24 h-24 object-cover rounded-sm"
+            class="catalog__scan-image"
             [src]="scanResult.image"
             alt="Scanned product"
           />
-          <p class="catalog__scan-source m-0 text-sm text-text-secondary">
-            Captured via {{ scanResult.source === "capacitor" ? "native camera" : "web camera" }}
+          <p class="catalog__scan-source" [style.color]="colorSecondary">
+            Captured via {{ scanResult.source === 'capacitor' ? 'native camera' : 'web camera' }}
           </p>
         </div>
       }
 
       @if (scanError) {
-        <p class="catalog__scan-error m-0 text-sm text-danger">{{ scanError }}</p>
+        <p class="catalog__scan-error" [style.color]="danger">{{ scanError }}</p>
       }
 
       @if (categories.length) {
-        <div class="catalog__categories flex flex-wrap gap-2">
+        <div class="catalog__categories">
           <button
             type="button"
-            class="catalog__chip inline-flex items-center justify-center px-3 py-1 rounded-full border border-border cursor-pointer text-sm font-medium"
+            class="catalog__chip"
             [class.is-active]="activeCategory === null"
-            [class.bg-brand-600]="activeCategory === null"
-            [class.text-text-inverse]="activeCategory === null"
-            [class.bg-transparent]="activeCategory !== null"
-            [class.text-text-primary]="activeCategory !== null"
+            [style.background]="activeCategory === null ? brand : 'transparent'"
+            [style.color]="activeCategory === null ? inverse : colorPrimary"
+            [style.borderColor]="border"
             (click)="onFilterCategory(null)"
           >
             All
@@ -111,12 +108,11 @@ export const CATALOG_SSR_PROPS = new InjectionToken<{
           @for (c of categories; track c.id) {
             <button
               type="button"
-              class="catalog__chip inline-flex items-center justify-center px-3 py-1 rounded-full border border-border cursor-pointer text-sm font-medium"
+              class="catalog__chip"
               [class.is-active]="activeCategory === c.slug"
-              [class.bg-brand-600]="activeCategory === c.slug"
-              [class.text-text-inverse]="activeCategory === c.slug"
-              [class.bg-transparent]="activeCategory !== c.slug"
-              [class.text-text-primary]="activeCategory !== c.slug"
+              [style.background]="activeCategory === c.slug ? brand : 'transparent'"
+              [style.color]="activeCategory === c.slug ? inverse : colorPrimary"
+              [style.borderColor]="border"
               (click)="onFilterCategory(c.slug)"
             >
               {{ c.name }}
@@ -126,35 +122,36 @@ export const CATALOG_SSR_PROPS = new InjectionToken<{
       }
 
       @if (visibleProducts.length) {
-        <ul class="catalog__grid m-0 p-0 list-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <ul class="catalog__grid">
           @for (p of visibleProducts; track p.id) {
             <li
-              class="catalog__card flex flex-col gap-2 p-3 border border-border rounded-md bg-surface cursor-pointer"
+              class="catalog__card"
+              [style.borderColor]="border"
+              [style.background]="surface"
               (click)="onProductClick(p)"
             >
-              <h3 class="catalog__card-name m-0 text-md font-semibold text-text-primary">
+              <h3 class="catalog__card-name" [style.color]="colorPrimary">
                 {{ p.name }}
               </h3>
-              <p class="catalog__card-desc m-0 text-sm text-text-secondary">
-                {{ p.description || "No description" }}
+              <p class="catalog__card-desc" [style.color]="colorSecondary">
+                {{ p.description || 'No description' }}
               </p>
-              <div class="catalog__card-meta flex items-center justify-between gap-2">
-                <span class="catalog__price text-md font-semibold text-brand-600">
+              <div class="catalog__card-meta">
+                <span class="catalog__price" [style.color]="brand">
                   {{ formatPrice(p.price.currency, p.price.amount) }}
                 </span>
                 <span
-                  class="catalog__stock text-sm font-medium"
-                  [class.text-success]="p.inStock"
-                  [class.text-danger]="!p.inStock"
+                  class="catalog__stock"
+                  [style.color]="p.inStock ? success : danger"
                 >
-                  {{ p.inStock ? "In stock" : "Out of stock" }}
+                  {{ p.inStock ? 'In stock' : 'Out of stock' }}
                 </span>
               </div>
             </li>
           }
         </ul>
       } @else {
-        <p class="catalog__empty p-4 text-center text-text-secondary">
+        <p class="catalog__empty" [style.color]="colorSecondary">
           No products match the current filter.
         </p>
       }
@@ -211,6 +208,16 @@ export class CatalogComponent {
   /** A human-readable error from the last failed capture, or `null`. */
   scanError: string | null = null;
 
+  // Design tokens resolved to `var(--token)` strings once for the template.
+  readonly colorPrimary = cssVar(Tokens.color.textPrimary);
+  readonly colorSecondary = cssVar(Tokens.color.textSecondary);
+  readonly brand = cssVar(Tokens.color.brand600);
+  readonly inverse = cssVar(Tokens.color.textInverse);
+  readonly surface = cssVar(Tokens.color.surface);
+  readonly border = cssVar(Tokens.color.border);
+  readonly success = cssVar(Tokens.color.success);
+  readonly danger = cssVar(Tokens.color.danger);
+
   /** Products after applying the active category filter. */
   get visibleProducts(): Product[] {
     if (this.activeCategory === null) {
@@ -224,7 +231,7 @@ export class CatalogComponent {
   /** Format integer cents + currency code into a display string (e.g. `$249.99`). */
   formatPrice(currency: string, amountCents: number): string {
     const major = amountCents / 100;
-    const symbol = currency === "USD" ? "$" : `${currency} `;
+    const symbol = currency === 'USD' ? '$' : `${currency} `;
     return `${symbol}${major.toFixed(2)}`;
   }
 
@@ -232,7 +239,7 @@ export class CatalogComponent {
   onFilterCategory(slug: string | null): void {
     this.activeCategory = slug;
     this.filterChanged.emit(slug);
-    this.eventBus?.emit(CatalogEvent["catalog:filterChanged"], {
+    this.eventBus?.emit(CatalogEvent['catalog:filterChanged'], {
       category: slug ?? undefined,
     });
   }
@@ -240,9 +247,9 @@ export class CatalogComponent {
   /** A product card was activated: notify consumers + publish to the bus. */
   onProductClick(product: Product): void {
     this.productSelected.emit(product);
-    this.eventBus?.emit(CatalogEvent["catalog:productViewed"], {
+    this.eventBus?.emit(CatalogEvent['catalog:productViewed'], {
       productId: product.id,
-      source: "mf-catalog",
+      source: 'mf-catalog',
     });
   }
 
@@ -263,7 +270,7 @@ export class CatalogComponent {
     } catch (err) {
       this.scanResult = null;
       this.scanError =
-        err instanceof Error ? err.message : "Camera capture failed.";
+        err instanceof Error ? err.message : 'Camera capture failed.';
     } finally {
       this.scanning = false;
     }
