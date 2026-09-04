@@ -1,7 +1,7 @@
 # `@jrumandal/catalog` — Catalog Micro-Frontend
 
-Angular 20 micro-frontend for the multi-framework micro-frontend reference
-architecture. It is a **source-only ESM package**: the shell (Vite) bundles it
+Angular 22 micro-frontend for the multi-framework micro-frontend reference
+architecture. It is a **source-only ESM package**: the shell bundles it
 together with the other micro-frontends, so this repo ships TypeScript source
 directly (`main`/`types` → `src/index.ts`) rather than a pre-built bundle.
 
@@ -16,11 +16,11 @@ the shell as the **`<mf-catalog>`** web component.
 
 | Concern    | Choice                                              |
 | ---------- | --------------------------------------------------- |
-| Framework  | Angular 20 (standalone, `@angular/elements`)        |
-| Distribution | Source-only ESM (bundled by the shell's Vite)     |
+| Framework  | Angular 22 (standalone, `@angular/elements`)        |
+| Distribution | Source-only ESM (bundled by the shell's `@angular/build`) |
 | Tests      | Vitest + jsdom                                      |
 | Lint       | ESLint 9 (flat) + typescript-eslint                 |
-| Types      | TypeScript 5.9                                      |
+| Types      | TypeScript 6.0                                      |
 | Styling    | Tailwind v4 (via `@jrumandal/design-tokens`)           |
 
 ## Shared dependencies
